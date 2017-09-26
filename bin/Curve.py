@@ -100,6 +100,12 @@ if __name__ == "__main__":
     top_termFreq_setName_week = ["TopTermFreq_set_week", 7]
     top_termFreq_setName_month = ["TopTermFreq_set_month", 31]
 
+    # TTL on key
+    word_ttl = p.config.getint("Module_Curve", "ttl_word") # days
+    word_ttl = word_ttl*24*60*60 # sec
+    zrank_ttl = p.config.getint("Module_Curve", "ttl_zrank") # days
+    zrank_ttl = zrank_ttl*24*60*60 # sec
+
     while True:
 
         if message is not None:
@@ -114,13 +120,13 @@ if __name__ == "__main__":
 
             low_word = word.lower()
             #Old curve with words in file
-            r_serv1.hincrby(low_word, date, int(score))
+            #r_serv1.hincrby(low_word, date, int(score))
 
             # Update redis
             #consider the num of occurence of this term
-            curr_word_value = int(server_term.hincrby(timestamp, low_word, int(score)))
+            server_term.hincrby(timestamp, low_word, int(score))
             #1 term per paste
-            curr_word_value_perPaste = int(server_term.hincrby("per_paste_" + str(timestamp), low_word, int(1)))
+            server_term.hincrby("per_paste_" + str(timestamp), low_word, int(1))
 
             # Add in set only if term is not in the blacklist
             if low_word not in server_term.smembers(BlackListTermsSet_Name):
@@ -131,6 +137,14 @@ if __name__ == "__main__":
              
             #Add more info for tracked terms
             check_if_tracked_term(low_word, filename)
+
+            # set expire
+            if word_ttl > 0:
+                server_term.expire(timestamp, word_ttl)
+                server_term.expire("per_paste_" + str(timestamp), word_ttl)
+            if zrank_ttl > 0:
+                server_term.expire(curr_set, zrank_ttl)
+                server_term.expire("per_paste_" + curr_set, zrank_ttl)
 
             #send to RegexForTermsFrequency
             to_send = "{} {} {}".format(filename, timestamp, word)

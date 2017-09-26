@@ -50,6 +50,11 @@ operation_mode = 1
 #Define the time that a paste will be considerate duplicate. in seconds (1day = 86400)
 ttl_duplicate = 86400
 
+[Module_Curve]
+# In days, 0 day for no TTL
+ttl_word = 365
+ttl_zrank = 365
+
 ##### Redis #####
 [Redis_Cache]
 host = localhost
