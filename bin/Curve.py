@@ -90,6 +90,9 @@ if __name__ == "__main__":
                             p.config.get("Directories", "wordtrending_csv"))
     wordfile_path = os.path.join(os.environ['AIL_HOME'],
                                  p.config.get("Directories", "wordsfile"))
+    supplied_words = []
+    with open(wordfile_path, 'rb') as f:
+        supplied_words = sorted([word.strip() for word in f if word.strip()[0:2]!='//' and word.strip()!='' ])
 
     message = p.get_from_set()
     prec_filename = None
@@ -120,7 +123,8 @@ if __name__ == "__main__":
 
             low_word = word.lower()
             #Old curve with words in file
-            #r_serv1.hincrby(low_word, date, int(score))
+            if low_word in supplied_words:
+                r_serv1.hincrby(low_word, date, int(score))
 
             # Update redis
             #consider the num of occurence of this term
@@ -158,8 +162,8 @@ if __name__ == "__main__":
                 today = datetime.date.today()
                 year = today.year
                 month = today.month
-                lib_words.create_curve_with_word_file(r_serv1, csv_path,
-                                                      wordfile_path, year,
+                lib_words.create_curve_from_redis_set(r_serv1, csv_path,
+                                                      set_to_plot, year,
                                                       month)
 
             publisher.debug("Script Curve is Idling")
