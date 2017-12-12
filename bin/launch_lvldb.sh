@@ -17,7 +17,7 @@ if [ ! -d "$lvdbdir$db_y" ]; then
     mkdir -p "$db_y"
 fi
 
-screen -dmS "LevelDB"
+screen -dmS "LevelDB_AIL"
 sleep 0.1
 echo -e $GREEN"\t* Launching Levels DB servers"$DEFAULT
 
@@ -25,5 +25,5 @@ echo -e $GREEN"\t* Launching Levels DB servers"$DEFAULT
 for pathDir in $lvdbdir*/ ; do
     yDir=$(basename "$pathDir")
     sleep 0.1
-    screen -S "LevelDB" -X screen -t "$yDir" bash -c 'redis-leveldb -H '$lvdbhost' -D '$pathDir'/ -P '$yDir' -M '$nb_db'; read x'
+    screen -S "LevelDB_AIL" -X screen -t "$yDir" bash -c 'redis-leveldb -H '$lvdbhost' -D '$pathDir'/ -P '$yDir' -M '$nb_db'; read x'
 done

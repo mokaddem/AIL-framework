@@ -9,15 +9,19 @@ set -x
 
 conf_dir="${AIL_HOME}/configs/"
 
-screen -dmS "Redis"
+screen -dmS "Redis_AIL"
 sleep 0.1
 echo -e $GREEN"\t* Launching Redis servers"$DEFAULT
-screen -S "Redis" -X screen -t "6379" bash -c '../redis/src/redis-server '$conf_dir'6379.conf ; read x'
+screen -S "Redis_AIL" -X screen -t "6379" bash -c 'redis-server '$conf_dir'6379.conf ; read x'
 sleep 0.1
-screen -S "Redis" -X screen -t "6380" bash -c '../redis/src/redis-server '$conf_dir'6380.conf ; read x'
+screen -S "Redis_AIL" -X screen -t "6380" bash -c 'redis-server '$conf_dir'6380.conf ; read x'
 sleep 0.1
-screen -S "Redis" -X screen -t "6381" bash -c '../redis/src/redis-server '$conf_dir'6381.conf ; read x'
+screen -S "Redis_AIL" -X screen -t "6381" bash -c 'redis-server '$conf_dir'6381.conf ; read x'
 
 # For Words and curves
 sleep 0.1
-screen -S "Redis" -X screen -t "6382" bash -c '../redis/src/redis-server '$conf_dir'6382.conf ; read x'
+# escaping / for sed
+preProcessedPath=$(echo $AIL_HOME | sed 's_/_\\/_g')
+# Replacing variable in 6382.conf by the path and writting the modified config into a temp file
+sed 's/{AIL_HOME}/'$preProcessedPath'/g' < $conf_dir'6382.conf' > $conf_dir'temp6382.conf'
+screen -S "Redis_AIL" -X screen -t "6382" bash -c 'redis-server '$conf_dir'temp6382.conf ; read x'
