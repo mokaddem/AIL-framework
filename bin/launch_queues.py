@@ -29,8 +29,8 @@ if __name__ == '__main__':
     modules = config.sections()
     pids = {}
     for module in modules:
-        pin = subprocess.Popen(["python", './QueueIn.py', '-c', module])
-        pout = subprocess.Popen(["python", './QueueOut.py', '-c', module])
+        pin = subprocess.Popen(["python", os.path.join(os.environ['AIL_BIN'], './QueueIn.py'), '-c', module])
+        pout = subprocess.Popen(["python", os.path.join(os.environ['AIL_BIN'], './QueueOut.py'), '-c', module])
         pids[module] = (pin, pout)
     is_running = True
     try:

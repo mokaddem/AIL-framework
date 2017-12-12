@@ -14,7 +14,7 @@ import os
 from os.path import join
 import sys
 sys.path.append(os.path.join(os.environ['AIL_BIN'], 'packages/'))
-sys.path.append('./modules/')
+sys.path.append(os.path.join(os.environ['AIL_FLASK'], 'modules/'))
 import Paste
 from Date import Date
 
@@ -32,20 +32,20 @@ app = Flask_config.app
 # Get headers items that should be ignored (not displayed)
 toIgnoreModule = set()
 try:
-    with open('templates/ignored_modules.txt', 'r') as f:
+    with open(os.path.join(os.environ['AIL_FLASK'], 'templates/ignored_modules.txt'), 'r') as f:
         lines = f.read().splitlines()
         for line in lines:
             toIgnoreModule.add(line)
 
 except IOError:
-    f = open('templates/ignored_modules.txt', 'w')
+    f = open(os.path.join(os.environ['AIL_FLASK'], 'templates/ignored_modules.txt'), 'w')
     f.close()
 
 
 # Dynamically import routes and functions from modules
 # Also, prepare header.html
 to_add_to_header_dico = {}
-for root, dirs, files in os.walk('modules/'):
+for root, dirs, files in os.walk(os.path.join(os.environ['AIL_FLASK'], 'modules/')):
     sys.path.append(join(root))
 
     # Ignore the module
@@ -67,7 +67,7 @@ for root, dirs, files in os.walk('modules/'):
 
 #create header.html
 complete_header = ""
-with open('templates/header_base.html', 'r') as f:
+with open(os.path.join(os.environ['AIL_FLASK'], 'templates/header_base.html'), 'r') as f:
     complete_header = f.read()
 modified_header = complete_header
 
@@ -86,7 +86,7 @@ for module_name, txt in to_add_to_header_dico.items():
 modified_header = modified_header.replace('<!--insert here-->', '\n'.join(to_add_to_header))
 
 #Write the header.html file
-with open('templates/header.html', 'w') as f:
+with open(os.path.join(os.environ['AIL_FLASK'], 'templates/header.html'), 'w') as f:
     f.write(modified_header)
 
 

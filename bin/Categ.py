@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Start Categ module on files.')
 
     parser.add_argument(
-        '-d', type=str, default="../files/",
+        '-d', type=str, default=os.path.join(os.environ['AIL_HOME'], "files/"),
         help='Path to the directory containing the category files.',
         action='store')
 

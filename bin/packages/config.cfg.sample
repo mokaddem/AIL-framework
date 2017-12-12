@@ -28,6 +28,7 @@ max_preview_modal = 800
 default_display = 10
 #Number of minutes displayed for the number of processed pastes.
 minute_processed_paste = 10
+DiffMaxLineLength = 10000
 
 #### Modules #### 
 [Modules_Duplicates]

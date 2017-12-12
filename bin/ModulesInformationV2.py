@@ -19,7 +19,7 @@ from packages import Paste
 
  # CONFIG VARIABLES
 kill_retry_threshold = 60 #1m
-log_filename = "../logs/moduleInfo.log"
+log_filename = os.path.join(os.environ['AIL_HOME'], "logs/moduleInfo.log")
 command_search_pid = "ps a -o pid,cmd | grep {}"
 command_search_name = "ps a -o pid,cmd | grep {}"
 command_restart_module = "screen -S \"Script\" -X screen -t \"{}\" bash -c \"./{}.py; read x\""
@@ -517,7 +517,7 @@ def cleanRedis():
             try:
                 for line in proc.stdout:
                     splittedLine = line.split()
-                    if ('python2' in splittedLine or 'python' in splittedLine) and "./"+moduleName+".py" in splittedLine:
+                    if ('python2' in splittedLine or 'python' in splittedLine) and any("/"+moduleName+".py" in item for item in splittedLine):
                         flag_pid_valid = True
 
                 if not flag_pid_valid:
@@ -814,7 +814,7 @@ if __name__ == "__main__":
     except IOError as e:
         if e.errno == 2: #module_file not found, creating a new one
             print(path_allmod + " not found.\nCreating a new one.")
-            os.system("./../doc/generate_modules_data_flow_graph.sh")
+            os.system(os.path.join(os.environ['AIL_HOME'], "doc/generate_modules_data_flow_graph.sh"))
             with open(path_allmod, 'r') as module_file:
                 for line in module_file:
                     module_file_array.add(line[:-1])

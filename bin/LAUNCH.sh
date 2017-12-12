@@ -61,7 +61,11 @@ function launching_redis {
 
     # For Words and curves
     sleep 0.1
-    screen -S "Redis_AIL" -X screen -t "6382" bash -c 'redis-server '$conf_dir'6382.conf ; read x'
+    # escaping / for sed
+    preProcessedPath=$(echo $AIL_HOME | sed 's_/_\\/_g')
+    # Replacing variable in 6382.conf by the path and writting the modified config into a temp file
+    sed 's/{AIL_HOME}/'$preProcessedPath'/g' < $conf_dir'6382.conf' > $conf_dir'temp6382.conf'
+    screen -S "Redis_AIL" -X screen -t "6382" bash -c 'redis-server '$conf_dir'temp6382.conf ; read x'
 }
 
 function launching_lvldb {
@@ -91,9 +95,9 @@ function launching_logs {
     screen -dmS "Logging_AIL"
     sleep 0.1
     echo -e $GREEN"\t* Launching logging process"$DEFAULT
-    screen -S "Logging_AIL" -X screen -t "LogQueue" bash -c 'log_subscriber -p 6380 -c Queuing -l ../logs/; read x'
+    screen -S "Logging_AIL" -X screen -t "LogQueue" bash -c 'log_subscriber -p 6380 -c Queuing -l '$AIL_HOME'/logs/; read x'
     sleep 0.1
-    screen -S "Logging_AIL" -X screen -t "LogScript" bash -c 'log_subscriber -p 6380 -c Script -l ../logs/; read x'
+    screen -S "Logging_AIL" -X screen -t "LogScript" bash -c 'log_subscriber -p 6380 -c Script -l '$AIL_HOME'/logs/; read x'
 }
 
 function launching_queues {
@@ -101,12 +105,12 @@ function launching_queues {
     sleep 0.1
 
     echo -e $GREEN"\t* Launching all the queues"$DEFAULT
-    screen -S "Queue_AIL" -X screen -t "Queues" bash -c './launch_queues.py; read x'
+    screen -S "Queue_AIL" -X screen -t "Queues" bash -c $AIL_BIN'launch_queues.py; read x'
 }
 
 function launching_scripts {
     echo -e "\t* Checking configuration"
-    bash -c "./Update-conf.py"
+    bash -c $AIL_BIN"Update-conf.py"
     exitStatus=$?
     if [ $exitStatus -ge 1 ]; then
         echo -e $RED"\t* Configuration not up-to-date"$DEFAULT
@@ -118,61 +122,61 @@ function launching_scripts {
     sleep 0.1
     echo -e $GREEN"\t* Launching ZMQ scripts"$DEFAULT
 
-    screen -S "Script_AIL" -X screen -t "ModuleInformation" bash -c './ModulesInformationV2.py -k 0 -c 1; read x'
+    screen -S "Script_AIL" -X screen -t "ModuleInformation" bash -c $AIL_BIN'ModulesInformationV2.py -k 0 -c 1; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Mixer" bash -c './Mixer.py; read x'
+    screen -S "Script_AIL" -X screen -t "Mixer" bash -c $AIL_BIN'Mixer.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Global" bash -c './Global.py; read x'
+    screen -S "Script_AIL" -X screen -t "Global" bash -c $AIL_BIN'Global.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Duplicates" bash -c './Duplicates.py; read x'
+    screen -S "Script_AIL" -X screen -t "Duplicates" bash -c $AIL_BIN'Duplicates.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Attributes" bash -c './Attributes.py; read x'
+    screen -S "Script_AIL" -X screen -t "Attributes" bash -c $AIL_BIN'Attributes.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Lines" bash -c './Lines.py; read x'
+    screen -S "Script_AIL" -X screen -t "Lines" bash -c $AIL_BIN'Lines.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "DomClassifier" bash -c './DomClassifier.py; read x'
+    screen -S "Script_AIL" -X screen -t "DomClassifier" bash -c $AIL_BIN'DomClassifier.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Categ" bash -c './Categ.py; read x'
+    screen -S "Script_AIL" -X screen -t "Categ" bash -c $AIL_BIN'Categ.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Tokenize" bash -c './Tokenize.py; read x'
+    screen -S "Script_AIL" -X screen -t "Tokenize" bash -c $AIL_BIN'Tokenize.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "CreditCards" bash -c './CreditCards.py; read x'
+    screen -S "Script_AIL" -X screen -t "CreditCards" bash -c $AIL_BIN'CreditCards.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Onion" bash -c './Onion.py; read x'
+    screen -S "Script_AIL" -X screen -t "Onion" bash -c $AIL_BIN'Onion.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Mail" bash -c './Mail.py; read x'
+    screen -S "Script_AIL" -X screen -t "Mail" bash -c $AIL_BIN'Mail.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Web" bash -c './Web.py; read x'
+    screen -S "Script_AIL" -X screen -t "Web" bash -c $AIL_BIN'Web.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Credential" bash -c './Credential.py; read x'
+    screen -S "Script_AIL" -X screen -t "Credential" bash -c $AIL_BIN'Credential.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Curve" bash -c './Curve.py; read x'
+    screen -S "Script_AIL" -X screen -t "Curve" bash -c $AIL_BIN'Curve.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "CurveManageTopSets" bash -c './CurveManageTopSets.py; read x'
+    screen -S "Script_AIL" -X screen -t "CurveManageTopSets" bash -c $AIL_BIN'CurveManageTopSets.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "RegexForTermsFrequency" bash -c './RegexForTermsFrequency.py; read x'
+    screen -S "Script_AIL" -X screen -t "RegexForTermsFrequency" bash -c $AIL_BIN'RegexForTermsFrequency.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "SetForTermsFrequency" bash -c './SetForTermsFrequency.py; read x'
+    screen -S "Script_AIL" -X screen -t "SetForTermsFrequency" bash -c $AIL_BIN'SetForTermsFrequency.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Indexer" bash -c './Indexer.py; read x'
+    screen -S "Script_AIL" -X screen -t "Indexer" bash -c $AIL_BIN'Indexer.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Keys" bash -c './Keys.py; read x'
+    screen -S "Script_AIL" -X screen -t "Keys" bash -c $AIL_BIN'Keys.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Phone" bash -c './Phone.py; read x'
+    screen -S "Script_AIL" -X screen -t "Phone" bash -c $AIL_BIN'Phone.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Release" bash -c './Release.py; read x'
+    screen -S "Script_AIL" -X screen -t "Release" bash -c $AIL_BIN'Release.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "Cve" bash -c './Cve.py; read x'
+    screen -S "Script_AIL" -X screen -t "Cve" bash -c $AIL_BIN'Cve.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "WebStats" bash -c './WebStats.py; read x'
+    screen -S "Script_AIL" -X screen -t "WebStats" bash -c $AIL_BIN'WebStats.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "ModuleStats" bash -c './ModuleStats.py; read x'
+    screen -S "Script_AIL" -X screen -t "ModuleStats" bash -c $AIL_BIN'ModuleStats.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "SQLInjectionDetection" bash -c './SQLInjectionDetection.py; read x'
+    screen -S "Script_AIL" -X screen -t "SQLInjectionDetection" bash -c $AIL_BIN'SQLInjectionDetection.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "alertHandler" bash -c './alertHandler.py; read x'
+    screen -S "Script_AIL" -X screen -t "alertHandler" bash -c $AIL_BIN'alertHandler.py; read x'
     sleep 0.1
-    screen -S "Script_AIL" -X screen -t "SentimentAnalysis" bash -c './SentimentAnalysis.py; read x'
+    screen -S "Script_AIL" -X screen -t "SentimentAnalysis" bash -c $AIL_BIN'SentimentAnalysis.py; read x'
 
 }
 
@@ -181,7 +185,7 @@ function launching_flask {
     sleep 0.1
 
     echo -e $GREEN"\t* Launching Flask server"$DEFAULT
-    screen -S "Flask_AIL" -X screen -t "Flask" bash -c './var/www/Flask_server.py; read x'
+    screen -S "Flask_AIL" -X screen -t "Flask" bash -c $AIL_FLASK'Flask_server.py; read x'
 }
 
 function shutting_down_redis {
@@ -294,8 +298,8 @@ for i in ${!options[@]}; do
                     if checking_redis; then
                         launching_scripts;
                     else
-                        echo -e $YELLOW"\tScript not started, waiting 3 secondes"$DEFAULT
-                        sleep 3
+                        echo -e $YELLOW"\tScript not started, waiting 5 secondes"$DEFAULT
+                        sleep 5
                         if checking_redis; then
                             launching_scripts;
                         else
@@ -327,11 +331,11 @@ for i in ${!options[@]}; do
                 fi
                 ;;
             Shutdown)
-                bash -c "./Shutdown.py"
+                bash -c $AIL_BIN"/Shutdown.py"
                 ;;
             Update-config)
                 echo -e "\t* Checking configuration"
-                bash -c "./Update-conf.py"
+                bash -c $AIL_BIN"/Update-conf.py"
                 exitStatus=$?
                 if [ $exitStatus -ge 1 ]; then
                     echo -e $RED"\t* Configuration not up-to-date"$DEFAULT
