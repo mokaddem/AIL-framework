@@ -176,6 +176,14 @@ function launching_scripts {
 
 }
 
+function launching_flask {
+    screen -dmS "Flask_AIL"
+    sleep 0.1
+
+    echo -e $GREEN"\t* Launching Flask server"$DEFAULT
+    screen -S "Flask_AIL" -X screen -t "Flask" bash -c './var/www/Flask_server.py; read x'
+}
+
 function shutting_down_redis {
     redis_dir=${AIL_HOME}/redis/src/
     bash -c $redis_dir'redis-cli -p 6379 SHUTDOWN'
@@ -227,8 +235,9 @@ islvldb=`screen -ls | egrep '[0-9]+.LevelDB_AIL' | cut -d. -f1`
 islogged=`screen -ls | egrep '[0-9]+.Logging_AIL' | cut -d. -f1`
 isqueued=`screen -ls | egrep '[0-9]+.Queue_AIL' | cut -d. -f1`
 isscripted=`screen -ls | egrep '[0-9]+.Script_AIL' | cut -d. -f1`
+isflask=`screen -ls | egrep '[0-9]+.Flask_AIL' | cut -d. -f1`
 
-options=("Redis" "LevelDB" "Logs" "Queues" "Scripts" "Killall" "Shutdown" "Update-config")
+options=("Redis" "LevelDB" "Logs" "Queues" "Scripts" "Flask" "Killall" "Shutdown" "Update-config")
 
 menu() {
     echo "What do you want to Launch?:"
@@ -297,15 +306,22 @@ for i in ${!options[@]}; do
                     echo -e $RED"\t* A screen is already launched"$DEFAULT
                 fi
                 ;;
+            Flask)
+                if [[ ! $isflask ]]; then
+                    launching_flask;
+                else
+                    echo -e $RED"\t* A screen is already launched"$DEFAULT
+                fi
+                ;;
             Killall)
                 if [[ $isredis || $islvldb || $islogged || $isqueued || $isscripted ]]; then
                     echo -e $GREEN"Gracefully closing redis servers"$DEFAULT
                     shutting_down_redis;
                     echo -e $GREEN"Killing all"$DEFAULT
-                    kill $isredis $islvldb $islogged $isqueued $isscripted
+                    kill $isredis $islvldb $islogged $isqueued $isscripted $isflask
                     sleep 0.2
                     echo -e $ROSE`screen -ls`$DEFAULT
-                    echo -e $GREEN"\t* $isredis $islvldb $islogged $isqueued $isscripted killed."$DEFAULT
+                    echo -e $GREEN"\t* $isredis $islvldb $islogged $isqueued $isscripted $isflask killed."$DEFAULT
                 else
                     echo -e $RED"\t* No screen to kill"$DEFAULT
                 fi
