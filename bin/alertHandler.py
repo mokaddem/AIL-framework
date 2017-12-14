@@ -63,7 +63,7 @@ if __name__ == "__main__":
             message = p.get_from_set()
             if message is not None:
                 message = message.decode('utf8') #decode because of pyhton3
-                module_name, p_path = message.split(';')
+                module_name, p_path, info = message.split(';')
                 #PST = Paste.Paste(p_path)
             else:
                 publisher.debug("Script Attribute is idling 10s")
@@ -76,6 +76,9 @@ if __name__ == "__main__":
             server.sadd(key, p_path)
 
             publisher.info('Saved warning paste {}'.format(p_path))
+
+            # sending to generateReport
+            p.populate_set_out('{};{};{}'.format(module_name, p_path, info), 'generateReport')
 
             # Create MISP AIL-leak object and push it
             if flag_misp:

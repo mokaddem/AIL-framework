@@ -100,7 +100,9 @@ if __name__ == "__main__":
             #Send to duplicate
             p.populate_set_out(filepath, 'Duplicate')
             #Send to alertHandler
-            p.populate_set_out('credential;{}'.format(filepath), 'alertHandler')
+            info = { 'num': len(creds), 'sites': ', '.join(sites_set) }
+            p.populate_set_out('credential;{};{}'.format(filepath, json.dumps(info)), 'alertHandler')
+
             
             #Put in form, count occurences, then send to moduleStats
             creds_sites = {}
@@ -126,6 +128,7 @@ if __name__ == "__main__":
 
             if sites_set:
                 print("=======> Probably on : {}".format(', '.join(sites_set)))
+
         else:
             publisher.info(to_print)
             print('found {} credentials'.format(len(creds)))
