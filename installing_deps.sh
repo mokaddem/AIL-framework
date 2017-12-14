@@ -90,6 +90,7 @@ fi
 
 year1=20`date +%y`
 mkdir -p $AIL_HOME/{PASTES,Blooms,dumps}
+mkdir -p $AIL_BIN/reports
 mkdir -p $AIL_HOME/LEVEL_DB_DATA/$year1
 
 pip install -U pip
