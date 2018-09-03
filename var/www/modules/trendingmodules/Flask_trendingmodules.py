@@ -16,8 +16,11 @@ import Flask_config
 app = Flask_config.app
 cfg = Flask_config.cfg
 r_serv_charts = Flask_config.r_serv_charts
+r_serv_cred = Flask_config.r_serv_cred
 
 trendingmodules = Blueprint('trendingmodules', __name__, template_folder='templates')
+REDIS_KEY_TOP_POSTED_USER = 'mostPostedUser'
+REDIS_KEY_ALL_CRED_SET_REV = 'AllCredentialsRev'
 
 # ============ FUNCTIONS ============
 
@@ -27,7 +30,17 @@ def get_top_relevant_data(server, module_name):
     days = 0
     for date in get_date_range(15):
         redis_progression_name_set = 'top_'+ module_name +'_set_' + date
-        member_set = server.zrevrangebyscore(redis_progression_name_set, '+inf', '-inf', withscores=True)
+        # member_set = server.zrevrangebyscore(redis_progression_name_set, '+inf', '-inf', withscores=True)
+        member_set = server.zrevrange(redis_progression_name_set, 0, 10, withscores=True)
+        tmp_member = []
+        if module_name == 'mostPostedUser': # we have the id, need to fetch the real username
+            for t in member_set:
+                username = server.hget(REDIS_KEY_ALL_CRED_SET_REV, t[0])
+                t2 = (username, t[1],)
+                tmp_member.append(t2)
+            member_set = tmp_member
+            print(member_set)
+
 
         if len(member_set) == 0: #No data for this date
             days += 1
@@ -66,11 +79,26 @@ def modulesCharts():
         return jsonify(bar_values)
 
     else:
-        member_set = get_top_relevant_data(r_serv_charts, module_name)
+        server = r_serv_cred if module_name == 'mostPostedUser' else r_serv_charts
+        member_set = get_top_relevant_data(server, module_name)
         member_set = member_set if member_set is not None else []
         if len(member_set) == 0:
             member_set.append(("No relevant data", int(100)))
         return jsonify(member_set)
+
+def mostPostedUsers():
+    keyword_name = request.args.get('keywordName')
+    module_name = request.args.get('moduleName')
+    bar_requested = True if request.args.get('bar') == "true" else False
+    num_day = int(request.args.get('days', 30))
+    date_range = get_date_range(num_day)
+
+    all_keys = []
+    for d in date_range:
+        k = REDIS_KEY_TOP_POSTED_USER + ':' + d
+        all_keys.append(k)
+    data = r_serv_charts.zunionstore('temp_most_posted_user', all_keys, 'SUM')
+    return jsonify(data)
 
 
 @trendingmodules.route("/_providersChart", methods=['GET'])

@@ -41,6 +41,12 @@ REDIS_KEY_ALL_CRED_SET_REV = 'AllCredentialsRev'
 REDIS_KEY_ALL_PATH_SET = 'AllPath'
 REDIS_KEY_ALL_PATH_SET_REV = 'AllPathRev'
 REDIS_KEY_MAP_CRED_TO_PATH = 'CredToPathMapping'
+REDIS_KEY_TOP_POSTED_USER = 'mostPostedUser'
+
+# mostPostedUser:DATE -> uniq_cred_id -> count
+def build_top_username(uniq, date, serv):
+    k = 'top_'+ REDIS_KEY_TOP_POSTED_USER +'_set_' + date
+    serv.zincrby(k, uniq, 1)
 
 if __name__ == "__main__":
     publisher.port = 6380
@@ -163,12 +169,4 @@ if __name__ == "__main__":
                 if len(partCred) > minimumLengthThreshold:
                     server_cred.sadd(partCred, uniq_num_cred)
 
-            build_top_username(uniq_num_path, paste._get_p_date(), server_cred)
-
-# hset:
-# mostPostedUser:DATE -> uniq_cred_id -> count
-def build_top_username(uniq, date, serv):
-    pass
-
-
-
+            build_top_username(uniq_num_cred, paste._get_p_date().__str__(), server_cred)
